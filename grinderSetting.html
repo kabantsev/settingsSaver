@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+var selectedSettingTag = "selectedSettings"
+
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+var minSetting = 6
+var maxSetting = 30
+var selectedId = getCookie(selectedSettingTag)
+selectedId = selectedId == "" ? 19 : selectedId;
+var options = ""
+for (let index = minSetting; index <= maxSetting; index++) {
+  options += '<option value="'+index+'" '
+  + (selectedId==index?"selected":"")+'>'
+  +index+'</option>'
+}
+
+function setCookie(cname, cvalue, exdays) {
+  const d = new Date();
+  d.setTime(d.getTime() + (exdays*24*60*60*1000));
+  let expires = "expires="+ d.toUTCString();
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function changeFavicon(text) {
+  const canvas = document.createElement('canvas');
+  canvas.height = 64;
+  canvas.width = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.font = '64px serif';
+  ctx.fillText(text, 0, 64);
+
+  const link = document.createElement('link');
+  const oldLinks = document.querySelectorAll('link[rel="shortcut icon"]');
+  oldLinks.forEach(e => e.parentNode.removeChild(e));
+  link.id = 'dynamic-favicon';
+  link.rel = 'shortcut icon';
+  link.href = canvas.toDataURL();
+  document.head.appendChild(link);
+}
+
+function updateSettings() {
+  var selIndex = document.getElementById("selectedSetting").selectedIndex;
+  var options = document.getElementById("selectedSetting").options;
+  var newSetting = options[selIndex].text
+  changeFavicon(newSetting)
+  setCookie("selectedSettings", newSetting, 365)
+  console.log("updatesettings was executed: "+newSetting)
+}
+var selectorText = `<select name="settings"
+ id="selectedSetting" autofocus 
+ onchange="updateSettings()">
+  ${options}
+</select>`
+document.addEventListener("DOMContentLoaded", function(event) {
+	container = document.getElementById("container")
+	container.innerHTML = selectorText
+});
+</script>
+<div id="container"></div>
+</body>
+</html>
+
